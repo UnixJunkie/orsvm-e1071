@@ -10,7 +10,7 @@ let main () =
   assert(Svm.train data_fn labels_fn cost gamma model_fn);
   let predictions_fn = "test_predictions.txt" in
   assert(Svm.predict model_fn data_fn predictions_fn);
-  let _predictions = Svm.read_predictions predictions_fn in
-  ()
+  let predictions = Svm.read_predictions predictions_fn in
+  List.iter (Printf.printf "%f\n") predictions
 
 let () = main ()
