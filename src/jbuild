@@ -1,0 +1,10 @@
+(jbuild_version 1)
+
+(library
+ ((name        orsvm_e1071)
+  (public_name orsvm_e1071)
+  (modules (svm))))
+
+(executables
+ ((names     (test))
+  (libraries (minicli dolog))))
