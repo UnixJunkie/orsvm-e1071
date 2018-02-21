@@ -1,3 +1,3 @@
 #!/bin/bash
 
-R --vanilla --slave CMD BATCH test.r
+R --vanilla --slave < test.r 2>&1 > /dev/null
