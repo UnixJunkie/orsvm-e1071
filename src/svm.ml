@@ -78,6 +78,7 @@ let iter_on_lines_of_file fn f =
 let read_predictions (predictions_fn: filename): float list =
   let res = ref [] in
   iter_on_lines_of_file predictions_fn (fun line ->
-      Scanf.sscanf line "%f" (fun x -> x)
+      let pred = Scanf.sscanf line "%f" (fun x -> x) in
+      res := pred :: !res
     );
   List.rev !res
