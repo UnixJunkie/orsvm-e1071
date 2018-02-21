@@ -28,11 +28,15 @@ let train
        save(model, file='%s')\n\
        quit()\n"
       data_fn labels_fn cost gamma model_fn in
-  (* dump it to file *)
-  with_out_file model_fn (fun out -> fprintf out "%s" r_script);
+  (* dump it to temp file *)
+  let r_script_fn = Filename.temp_file "orsvm_e1071_train_" ".r" in
+  with_out_file r_script_fn (fun out -> fprintf out "%s" r_script);
+  Log.debug "%s" r_script_fn;
   (* execute it *)
-  let cmd = sprintf "R --vanilla --slave < %s 2>&1 > /dev/null" r_script in
-  (Sys.command cmd = 0)
+  let cmd = sprintf "R --vanilla --slave < %s 2>&1 > /dev/null" r_script_fn in
+  let exit_status = Sys.command cmd in
+  (* Sys.remove r_script_fn; (\* rm temp file *\) *)
+  (exit_status = 0)
 
 (* use model in 'model_fn' to predict decision values for test data in 'data_fn'.
    the exit code of the R script is returned *)
@@ -43,21 +47,23 @@ let predict
   (* create R script *)
   let r_script =
     sprintf
-      "newdata = as.matrix(read.table('%s'))\n\
+      "library('e1071')\n\
+       newdata = as.matrix(read.table('%s'))\n\
        load('%s')\n\
        values = attributes(predict(model, newdata, decision.values = TRUE)\
                           )$decision.values\n\
-       write.table(values, file = '%s', sep = '\n', \
+       write.table(values, file = '%s', sep = '\\n', \
                    row.names = FALSE, col.names = FALSE)\n\
        quit()\n"
       data_fn model_fn predictions_fn in
   (* dump it to temp file *)
-  let r_script_fn = Filename.temp_file "orsvm_e1071_" ".r" in
+  let r_script_fn = Filename.temp_file "orsvm_e1071_predict_" ".r" in
   with_out_file r_script_fn (fun out -> fprintf out "%s" r_script);
+  Log.debug "%s" r_script_fn;
   (* execute it *)
   let cmd = sprintf "R --vanilla --slave < %s 2>&1 > /dev/null" r_script_fn in
   let exit_status = Sys.command cmd in
-  Sys.remove r_script_fn; (* rm temp file *)
+  (* Sys.remove r_script_fn; (\* rm temp file *\) *)
   (exit_status = 0)
 
 let iter_on_lines_of_file fn f =
