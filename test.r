@@ -19,6 +19,8 @@ model <- svm(x, y, type = 'C-classification', scale = FALSE,
 
 save(model, file="r_svm_model.bin")
 
+load("r_svm_model.bin")
+
 values = attributes(predict(model, newdata = x, decision.values = TRUE))$decision.values
 
 write.table(values, file = "data/predictions.txt", sep = "\n", row.names = F, col.names = F)
