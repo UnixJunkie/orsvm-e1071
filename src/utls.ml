@@ -16,3 +16,8 @@ let append_file_to_buffer buff fn =
       let len = in_channel_length input in
       Buffer.add_channel buff input len
     )
+
+let iter_on_lines_of_file fn f =
+  let input = open_in_bin fn in
+  try while true do f (input_line input) done
+  with End_of_file -> close_in input
