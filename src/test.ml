@@ -1,3 +1,14 @@
+open Printf
+
+module L = BatList
+
+module Score_label = struct
+  type t = bool * float (* (label, pred_score) *)
+  let get_label (l, _) = l
+  let get_score (_, s) = s
+end
+
+module ROC = MakeROC.Make(Score_label)
 
 let main () =
   Log.set_log_level Log.DEBUG;
@@ -9,6 +20,18 @@ let main () =
   let model = Svm.train ~debug:true data_fn labels_fn ~cost ~gamma in
   let predictions_fn = Svm.predict ~debug:true model data_fn in
   let predictions = Svm.read_predictions predictions_fn in
-  List.iter (Printf.printf "%f\n") predictions
+  assert(List.length predictions = 88);
+  (* List.iter (printf "%f\n") predictions *)
+  let labels =
+    let labels_line = Utls.with_in_file labels_fn input_line in
+    let label_strings = BatString.split_on_char '\t' labels_line in
+    L.map (function
+        | "1" -> true
+        | "-1" -> false
+        | other -> failwith other
+      ) label_strings in
+  let for_auc = List.combine labels predictions in
+  let auc = ROC.auc for_auc in
+  printf "AUC: %.3f\n" auc
 
 let () = main ()
