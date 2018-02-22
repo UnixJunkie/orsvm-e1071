@@ -18,6 +18,6 @@ test:
 	_build/default/src/test.exe
 
 uninstall:
-	jubilder uninstall
+	jbuilder uninstall
 
 reinstall: uninstall install
