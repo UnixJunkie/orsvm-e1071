@@ -21,6 +21,7 @@ let collect_script_and_log r_script_fn r_log_fn model_fn =
 
 (* train model and return the filename it was saved to upon success *)
 let train
+    ?debug:(debug = false)
     (data_fn: filename)
     (labels_fn: filename)
     ~cost:cost
@@ -41,21 +42,23 @@ let train
   (* dump script to temp file *)
   let r_script_fn = Filename.temp_file "orsvm_e1071_train_" ".r" in
   Utls.with_out_file r_script_fn (fun out -> fprintf out "%s" r_script);
-  (* FBR: log command upon debug and don't rm tmp files *)
-  Log.debug "%s" r_script_fn;
   let r_log_fn = Filename.temp_file "orsvm_e1071_train_" ".log" in
   (* execute it *)
   let cmd = sprintf "R --vanilla --slave < %s 2>&1 > %s" r_script_fn r_log_fn in
+  if debug then Log.debug "%s" cmd;
   if Sys.command cmd = 0 then
     Utls.ignore_fst
-      (L.iter Sys.remove [r_script_fn; r_log_fn])
+      (if not debug then L.iter Sys.remove [r_script_fn; r_log_fn])
       (Ok model_fn)
   else
     collect_script_and_log r_script_fn r_log_fn model_fn
 
 (* use model in 'model_fn' to predict decision values for test data in 'data_fn'
    and return the filename containing values on success *)
-let predict (maybe_model_fn: result) (data_fn: filename): result =
+let predict
+    ?debug:(debug = false)
+    (maybe_model_fn: result)
+    (data_fn: filename): result =
   match maybe_model_fn with
   | Error err -> Error err
   | Ok model_fn ->
@@ -75,13 +78,13 @@ let predict (maybe_model_fn: result) (data_fn: filename): result =
     (* dump it to temp file *)
     let r_script_fn = Filename.temp_file "orsvm_e1071_predict_" ".r" in
     Utls.with_out_file r_script_fn (fun out -> fprintf out "%s" r_script);
-    Log.debug "%s" r_script_fn;
     (* execute it *)
     let r_log_fn = Filename.temp_file "orsvm_e1071_predict_" ".log" in
     let cmd = sprintf "R --vanilla --slave < %s 2>&1 > %s" r_script_fn r_log_fn in
+    if debug then Log.debug "%s" cmd;
     if Sys.command cmd = 0 then
       Utls.ignore_fst
-        (L.iter Sys.remove [r_script_fn; r_log_fn])
+        (if not debug then L.iter Sys.remove [r_script_fn; r_log_fn])
         (Ok predictions_fn)
     else
       collect_script_and_log r_script_fn r_log_fn predictions_fn
