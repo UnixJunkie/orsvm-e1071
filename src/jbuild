@@ -3,7 +3,7 @@
 (library
  ((name        orsvm_e1071)
   (public_name orsvm_e1071)
-  (modules (svm utls))
+  (modules (svm))
   (libraries (dolog))))
 
 (executables
