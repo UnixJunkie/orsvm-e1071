@@ -17,7 +17,16 @@ let append_file_to_buffer buff fn =
       Buffer.add_channel buff input len
     )
 
-let iter_on_lines_of_file fn f =
-  let input = open_in_bin fn in
-  try while true do f (input_line input) done
-  with End_of_file -> close_in input
+let ignore_fst _fst snd =
+  snd
+
+let fold_on_lines_of_file fn f acc =
+  with_in_file fn (fun input ->
+      let acc' = ref acc in
+      try
+        while true do
+          acc' := f !acc' (input_line input)
+        done;
+        assert(false)
+      with End_of_file -> !acc'
+    )
