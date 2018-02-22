@@ -27,34 +27,33 @@ let train
     ~cost:cost
     ~gamma:gamma: result =
   let model_fn = Filename.temp_file "orsvm_e1071_model_" ".bin" in
-  (* create R script *)
-  let r_script =
-    sprintf
-      "library('e1071')\n\
-       x = as.matrix(read.table('%s'))\n\
-       y = as.factor(as.vector(read.table('%s'), mode = 'numeric'))\n\
-       stopifnot(nrow(x) == length(y))\n\
-       model <- svm(x, y, type = 'C-classification', scale = FALSE, \
-       kernel = 'radial', cost = %f, gamma = %f)\n\
-       save(model, file='%s')\n\
-       quit()\n"
-      data_fn labels_fn cost gamma model_fn in
-  (* dump script to temp file *)
+  (* create R script and store it in a temp file *)
   let r_script_fn = Filename.temp_file "orsvm_e1071_train_" ".r" in
-  Utls.with_out_file r_script_fn (fun out -> fprintf out "%s" r_script);
+  Utls.with_out_file r_script_fn (fun out ->
+      fprintf out
+        "library('e1071')\n\
+         x = as.matrix(read.table('%s'))\n\
+         y = as.factor(as.vector(read.table('%s'), mode = 'numeric'))\n\
+         stopifnot(nrow(x) == length(y))\n\
+         model <- svm(x, y, type = 'C-classification', scale = FALSE, \
+         kernel = 'radial', cost = %f, gamma = %f)\n\
+         save(model, file='%s')\n\
+         quit()\n"
+        data_fn labels_fn cost gamma model_fn
+    );
   let r_log_fn = Filename.temp_file "orsvm_e1071_train_" ".log" in
   (* execute it *)
   let cmd = sprintf "R --vanilla --slave < %s 2>&1 > %s" r_script_fn r_log_fn in
   if debug then Log.debug "%s" cmd;
-  if Sys.command cmd = 0 then
+  if Sys.command cmd <> 0 then
+    collect_script_and_log r_script_fn r_log_fn model_fn
+  else
     Utls.ignore_fst
       (if not debug then L.iter Sys.remove [r_script_fn; r_log_fn])
       (Ok model_fn)
-  else
-    collect_script_and_log r_script_fn r_log_fn model_fn
 
 (* use model in 'model_fn' to predict decision values for test data in 'data_fn'
-   and return the filename containing values on success *)
+   and return the filename containing values upon success *)
 let predict
     ?debug:(debug = false)
     (maybe_model_fn: result)
@@ -82,12 +81,12 @@ let predict
     let r_log_fn = Filename.temp_file "orsvm_e1071_predict_" ".log" in
     let cmd = sprintf "R --vanilla --slave < %s 2>&1 > %s" r_script_fn r_log_fn in
     if debug then Log.debug "%s" cmd;
-    if Sys.command cmd = 0 then
+    if Sys.command cmd <> 0 then
+      collect_script_and_log r_script_fn r_log_fn predictions_fn
+    else
       Utls.ignore_fst
         (if not debug then L.iter Sys.remove [r_script_fn; r_log_fn])
         (Ok predictions_fn)
-    else
-      collect_script_and_log r_script_fn r_log_fn predictions_fn
 
 (* read the predicted decision values *)
 let read_predictions (maybe_predictions_fn: result): float list =
