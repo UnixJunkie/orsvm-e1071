@@ -70,6 +70,7 @@ let predict
          load('%s')\n\
          values = attributes(predict(model, newdata, decision.values = TRUE)\
                             )$decision.values\n\
+         stopifnot(nrow(newdata) == length(values))\n\
          write.table(values, file = '%s', sep = '\\n', \
          row.names = FALSE, col.names = FALSE)\n\
          quit()\n"
