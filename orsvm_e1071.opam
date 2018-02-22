@@ -6,7 +6,7 @@ bug-reports: "https://github.com/UnixJunkie/orsvm-e1071/issues"
 dev-repo: "git+https://github.com/UnixJunkie/orsvm-e1071.git"
 license: "LGPL + linking exception"
 build: [
-  ["R" "CMD" "BATCH" "install_e1071.r"]
+  ["R" "CMD" "BATCH" "files/install_e1071.r"]
   ["jbuilder" "build" "-p" name "-j" jobs]
 ]
 depends: [
