@@ -36,7 +36,7 @@ let train
          y = as.factor(as.vector(read.table('%s'), mode = 'numeric'))\n\
          stopifnot(nrow(x) == length(y))\n\
          model <- svm(x, y, type = 'C-classification', scale = FALSE, \
-         kernel = 'radial', cost = %f, gamma = %f)\n\
+                      kernel = 'radial', cost = %f, gamma = %f)\n\
          save(model, file='%s')\n\
          quit()\n"
         data_fn labels_fn cost gamma model_fn
@@ -69,7 +69,7 @@ let predict
          newdata = as.matrix(read.table('%s'))\n\
          load('%s')\n\
          values = attributes(predict(model, newdata, decision.values = TRUE)\
-         )$decision.values\n\
+                            )$decision.values\n\
          write.table(values, file = '%s', sep = '\\n', \
          row.names = FALSE, col.names = FALSE)\n\
          quit()\n"
