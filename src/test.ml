@@ -10,6 +10,12 @@ end
 
 module ROC = MakeROC.Make(Score_label)
 
+let with_in_file fn f =
+  let input = open_in_bin fn in
+  let res = f input in
+  close_in input;
+  res
+
 let main () =
   Log.set_log_level Log.DEBUG;
   Log.color_on ();
@@ -23,7 +29,7 @@ let main () =
   assert(List.length predictions = 88);
   (* List.iter (printf "%f\n") predictions *)
   let labels =
-    let labels_line = Utls.with_in_file labels_fn input_line in
+    let labels_line = with_in_file labels_fn input_line in
     let label_strings = BatString.split_on_char '\t' labels_line in
     L.map (function
         | "1" -> true
