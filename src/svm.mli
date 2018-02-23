@@ -10,9 +10,9 @@ type gamma = float
 type kernel = RBF of gamma
             | Linear
 
-(** [train data_fn labels_fn ~cost ~gamma] will train a binary
-    SVM classifier with a RBF kernel
-    with parameters [cost] and [gamma] on the data in [data_fn] with labels
+(** [train ~cost kernel data_fn labels_fn] will train a binary
+    SVM classifier with the given RBF or Linear kernel
+    with parameter [cost] on the data in [data_fn] with labels
     in [labels_fn].
     [data_fn] is a dense numerical matrix dumped in a tab-separated text file
     without any format header. Rows are observations, columns are features.
