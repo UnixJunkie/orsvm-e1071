@@ -4,7 +4,7 @@ build:
 	jbuilder build @install
 
 clean:
-	rm -rf _build
+	jbuilder clean
 
 edit:
 	emacs src/*.ml &
