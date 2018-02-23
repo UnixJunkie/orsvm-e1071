@@ -45,6 +45,13 @@ let main () =
   let rbf_auc = ROC.auc (List.combine labels rbf_preds) in
   printf "RBF AUC: %.3f\n" rbf_auc;
   let lin_auc = ROC.auc (List.combine labels lin_preds) in
-  printf "Lin AUC: %.3f\n" lin_auc
+  printf "Lin AUC: %.3f\n" lin_auc;
+  let maybe_lambdas = Svmpath.svmpath ~debug:true data_fn labels_fn in
+  match maybe_lambdas with
+  | Error err -> failwith err
+  | Result.Ok lambdas_fn ->
+    let lambdas = Utls.float_list_of_file lambdas_fn in
+    printf "lambdas:\n";
+    L.iter (printf "%f\n") lambdas
 
 let () = main ()
