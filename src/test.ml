@@ -10,6 +10,7 @@ end
 
 module ROC = MakeROC.Make(Score_label)
 
+(* # FBR: duplicated code from Svm.Utls !!! *)
 let with_in_file fn f =
   let input = open_in_bin fn in
   let res = f input in
@@ -22,11 +23,19 @@ let main () =
   let data_fn = "data/train_data.txt" in
   let labels_fn = "data/train_labels.txt" in
   let cost = 1.0 in
-  let gamma = 1.0 /. 1831.0 in
-  let model = Svm.train ~debug:true data_fn labels_fn ~cost ~gamma in
-  let predictions_fn = Svm.predict ~debug:true model data_fn in
-  let predictions = Svm.read_predictions predictions_fn in
-  assert(List.length predictions = 88);
+  let rbf_preds =
+    let rbf =
+      let gamma = 1.0 /. 1831.0 in
+      Svm.RBF gamma in
+    let rbf_model = Svm.train ~debug:true ~cost rbf data_fn labels_fn in
+    let rbf_preds_fn = Svm.predict ~debug:true rbf_model data_fn in
+    Svm.read_predictions rbf_preds_fn in
+  let lin_preds =
+    let lin_model = Svm.train ~debug:true ~cost Svm.Linear data_fn labels_fn in
+    let lin_preds_fn = Svm.predict ~debug:true lin_model data_fn in
+    Svm.read_predictions lin_preds_fn in
+  assert(List.length rbf_preds = 88);
+  assert(List.length lin_preds = 88);
   (* List.iter (printf "%f\n") predictions *)
   let labels =
     let labels_line = with_in_file labels_fn input_line in
@@ -36,8 +45,9 @@ let main () =
         | "-1" -> false
         | other -> failwith other
       ) label_strings in
-  let for_auc = List.combine labels predictions in
-  let auc = ROC.auc for_auc in
-  printf "AUC: %.3f\n" auc
+  let rbf_auc = ROC.auc (List.combine labels rbf_preds) in
+  printf "RBF AUC: %.3f\n" rbf_auc;
+  let lin_auc = ROC.auc (List.combine labels lin_preds) in
+  printf "Lin AUC: %.3f\n" lin_auc
 
 let () = main ()

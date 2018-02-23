@@ -42,6 +42,11 @@ type error_message = string
 type result = Ok of filename
             | Error of error_message
 
+type gamma = float
+
+type kernel = RBF of gamma
+            | Linear
+
 (* capture everything in case of error *)
 let collect_script_and_log r_script_fn r_log_fn model_fn =
   let buff = Buffer.create 4096 in
@@ -56,24 +61,27 @@ let collect_script_and_log r_script_fn r_log_fn model_fn =
 (* train model and return the filename it was saved to upon success *)
 let train
     ?debug:(debug = false)
-    (data_fn: filename)
-    (labels_fn: filename)
     ~cost:cost
-    ~gamma:gamma: result =
+    (kernel: kernel)
+    (data_fn: filename)
+    (labels_fn: filename): result =
   let model_fn = Filename.temp_file "orsvm_e1071_model_" ".bin" in
   (* create R script and store it in a temp file *)
   let r_script_fn = Filename.temp_file "orsvm_e1071_train_" ".r" in
+  let kernel_str = match kernel with
+    | RBF gamma -> sprintf "kernel = 'radial', gamma = %f" gamma
+    | Linear -> "kernel = 'linear'" in
   Utls.with_out_file r_script_fn (fun out ->
       fprintf out
         "library('e1071')\n\
          x = as.matrix(read.table('%s'))\n\
          y = as.factor(as.vector(read.table('%s'), mode = 'numeric'))\n\
          stopifnot(nrow(x) == length(y))\n\
-         model <- svm(x, y, type = 'C-classification', scale = FALSE, \
-                      kernel = 'radial', cost = %f, gamma = %f)\n\
+         model <- svm(x, y, type = 'C-classification', scale = FALSE, %s, \
+                      cost = %f)\n\
          save(model, file='%s')\n\
          quit()\n"
-        data_fn labels_fn cost gamma model_fn
+        data_fn labels_fn kernel_str cost model_fn
     );
   let r_log_fn = Filename.temp_file "orsvm_e1071_train_" ".log" in
   (* execute it *)

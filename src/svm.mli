@@ -5,6 +5,11 @@ type error_message = string
 type result = Ok of filename
             | Error of error_message
 
+type gamma = float
+
+type kernel = RBF of gamma
+            | Linear
+
 (** [train data_fn labels_fn ~cost ~gamma] will train a binary
     SVM classifier with a RBF kernel
     with parameters [cost] and [gamma] on the data in [data_fn] with labels
@@ -15,8 +20,7 @@ type result = Ok of filename
     in a text file, without any format header.
     Column [i] in [labels_fn] is the corresponding label of line [i]
     in [data_fn]. *)
-val train:
-  ?debug:bool -> filename -> filename -> cost:float -> gamma:float -> result
+val train: ?debug:bool -> cost:float -> kernel -> filename -> filename -> result
 
 (** [predict train_result to_predict_data_fn] will run the previously trained
     SVM model on the new data stored in [to_predict_data_fn].
