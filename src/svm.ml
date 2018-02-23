@@ -105,10 +105,4 @@ let predict
 let read_predictions (maybe_predictions_fn: result): float list =
   match maybe_predictions_fn with
   | Error err -> failwith err (* should have been handled by user before *)
-  | Ok predictions_fn ->
-    let res =
-      Utls.fold_on_lines_of_file predictions_fn (fun acc line ->
-          let pred = Scanf.sscanf line "%f" (fun x -> x) in
-          pred :: acc
-        ) [] in
-    L.rev res
+  | Ok predictions_fn -> Utls.float_list_of_file predictions_fn

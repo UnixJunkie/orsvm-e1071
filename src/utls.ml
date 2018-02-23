@@ -29,3 +29,11 @@ let fold_on_lines_of_file fn f acc =
         assert(false)
       with End_of_file -> !acc'
     )
+
+let float_list_of_file fn =
+  let res =
+    fold_on_lines_of_file fn (fun acc line ->
+        let pred = Scanf.sscanf line "%f" (fun x -> x) in
+        pred :: acc
+      ) [] in
+  L.rev res
