@@ -4,8 +4,9 @@
  ((name        orsvm_e1071)
   (public_name orsvm_e1071)
   (preprocessor_deps (utls.ml))
-  (preprocess (per_module ((action (run ${bin:cppo} ${<})) (svm))))
-  (modules (svm))
+  (preprocess (per_module ((action (run ${bin:cppo} ${<})) (svm))
+                          ((action (run ${bin:cppo} ${<})) (svmpath))))
+  (modules (svm svmpath))
   (libraries (dolog))))
 
 (executables
