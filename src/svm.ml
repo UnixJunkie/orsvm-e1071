@@ -6,19 +6,16 @@ module Utls = struct
   #include "utls.ml"
 end
 
-type filename = string
-type error_message = string
-
-type result = Ok of filename
-            | Error of error_message
-
 type gamma = float
-
 type kernel = RBF of gamma
             | Linear
 
+type filename = string
+
 (* capture everything in case of error *)
-let collect_script_and_log r_script_fn r_log_fn model_fn =
+let collect_script_and_log
+    (r_script_fn: filename) (r_log_fn: filename) (model_fn: filename)
+  : Result.t =
   let buff = Buffer.create 4096 in
   bprintf buff "--- %s ---\n" r_script_fn;
   Utls.append_file_to_buffer buff r_script_fn;
@@ -29,13 +26,9 @@ let collect_script_and_log r_script_fn r_log_fn model_fn =
   Error err_msg
 
 (* train model and return the filename it was saved to upon success *)
-let train
-    ?debug:(debug = false)
-    ~cost:cost
-    (kernel: kernel)
-    (data_fn: filename)
-    (labels_fn: filename): result =
-  let model_fn = Filename.temp_file "orsvm_e1071_model_" ".bin" in
+let train ?debug:(debug = false)
+    ~cost:cost kernel (data_fn: filename) (labels_fn: filename): Result.t =
+  let model_fn: filename = Filename.temp_file "orsvm_e1071_model_" ".bin" in
   (* create R script and store it in a temp file *)
   let r_script_fn = Filename.temp_file "orsvm_e1071_train_" ".r" in
   let kernel_str = match kernel with
@@ -62,14 +55,13 @@ let train
   else
     Utls.ignore_fst
       (if not debug then L.iter Sys.remove [r_script_fn; r_log_fn])
-      (Ok model_fn)
+      (Result.Ok model_fn)
 
 (* use model in 'model_fn' to predict decision values for test data in 'data_fn'
    and return the filename containing values upon success *)
 let predict
-    ?debug:(debug = false)
-    (maybe_model_fn: result)
-    (data_fn: filename): result =
+    ?debug:(debug = false) (maybe_model_fn: Result.t) (data_fn: filename)
+  : Result.t =
   match maybe_model_fn with
   | Error err -> Error err
   | Ok model_fn ->
@@ -99,10 +91,10 @@ let predict
     else
       Utls.ignore_fst
         (if not debug then L.iter Sys.remove [r_script_fn; r_log_fn])
-        (Ok predictions_fn)
+        (Result.Ok predictions_fn)
 
 (* read the predicted decision values *)
-let read_predictions (maybe_predictions_fn: result): float list =
+let read_predictions (maybe_predictions_fn: Result.t): float list =
   match maybe_predictions_fn with
   | Error err -> failwith err (* should have been handled by user before *)
   | Ok predictions_fn -> Utls.float_list_of_file predictions_fn

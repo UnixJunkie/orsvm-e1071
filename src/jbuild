@@ -6,7 +6,7 @@
   (preprocessor_deps (utls.ml))
   (preprocess (per_module ((action (run ${bin:cppo} ${<})) (svm))
                           ((action (run ${bin:cppo} ${<})) (svmpath))))
-  (modules (svm svmpath))
+  (modules (result svm svmpath))
   (libraries (dolog))))
 
 (executables
