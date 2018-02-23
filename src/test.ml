@@ -10,12 +10,9 @@ end
 
 module ROC = MakeROC.Make(Score_label)
 
-(* # FBR: duplicated code from Svm.Utls !!! *)
-let with_in_file fn f =
-  let input = open_in_bin fn in
-  let res = f input in
-  close_in input;
-  res
+module Utls = struct
+  #include "utls.ml"
+end
 
 let main () =
   Log.set_log_level Log.DEBUG;
@@ -38,7 +35,7 @@ let main () =
   assert(List.length lin_preds = 88);
   (* List.iter (printf "%f\n") predictions *)
   let labels =
-    let labels_line = with_in_file labels_fn input_line in
+    let labels_line = Utls.with_in_file labels_fn input_line in
     let label_strings = BatString.split_on_char '\t' labels_line in
     L.map (function
         | "1" -> true
