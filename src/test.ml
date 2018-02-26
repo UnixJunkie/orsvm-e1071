@@ -46,12 +46,24 @@ let main () =
   printf "RBF AUC: %.3f\n" rbf_auc;
   let lin_auc = ROC.auc (List.combine labels lin_preds) in
   printf "Lin AUC: %.3f\n" lin_auc;
-  let maybe_lambdas = Svmpath.svmpath ~debug:true data_fn labels_fn in
-  match maybe_lambdas with
+  let maybe_model = Svmpath.train ~debug:true data_fn labels_fn in
+  let maybe_lambdas_fn = Svmpath.read_lambdas ~debug:true maybe_model in
+  match maybe_lambdas_fn with
   | Error err -> failwith err
-  | Result.Ok lambdas_fn ->
+  | Ok lambdas_fn ->
     let lambdas = Utls.float_list_of_file lambdas_fn in
-    printf "lambdas:\n";
-    L.iter (printf "%f\n") lambdas
+    let best_auc = ref 0.0 in
+    let best_lambda = ref 0.0 in
+    L.iter (fun lambda ->
+        let svmpath_preds_fn =
+          Svmpath.predict ~debug:false ~lambda:lambda maybe_model data_fn in
+        let svmpath_preds = Svmpath.read_predictions svmpath_preds_fn in
+        let auc = ROC.auc (List.combine labels svmpath_preds) in
+        if auc > !best_auc then
+          (best_auc := auc;
+           best_lambda := lambda);
+      ) lambdas;
+    printf "svmpath best_lambda: %f best_AUC: %.3f\n"
+      !best_lambda !best_auc
 
 let () = main ()
