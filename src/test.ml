@@ -10,10 +10,6 @@ end
 
 module ROC = MakeROC.Make(Score_label)
 
-module Utls = struct
-  #include "utls.ml"
-end
-
 let main () =
   Log.set_log_level Log.DEBUG;
   Log.color_on ();
