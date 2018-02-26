@@ -12,9 +12,7 @@ stopifnot(nrow(x) == length(y))
 # TODO: scan C values for the linear kernel
 
 path <- svmpath(x, y)
-
 lambdas = path$lambda
-
 write.table(lambdas, file = "data/lambdas.txt", sep = "\n", row.names = F, col.names = F)
 
 # model <- svm(x, y, type = 'C-classification', scale = FALSE,
