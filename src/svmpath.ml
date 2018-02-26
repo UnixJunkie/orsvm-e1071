@@ -36,10 +36,10 @@ let train ?debug:(debug = false)
       (if not debug then L.iter Sys.remove [r_script_fn; r_log_fn])
       (Result.Ok model_fn)
 
-(* dump lambda values found during training to text file *)
-let read_lambdas ?debug:(debug = false) (maybe_model_fn: Result.t): Result.t =
+(* read lambda values found during training *)
+let read_lambdas ?debug:(debug = false) (maybe_model_fn: Result.t): float list =
   match maybe_model_fn with
-  | Error err -> Error err
+  | Error err -> []
   | Ok model_fn ->
     let lambdas_fn = Filename.temp_file "orsvm_lambdas_" ".txt" in
     (* create R script and store it in a temp file *)
@@ -58,12 +58,12 @@ let read_lambdas ?debug:(debug = false) (maybe_model_fn: Result.t): Result.t =
     (* execute it *)
     let cmd = sprintf "R --vanilla --slave < %s 2>&1 > %s" r_script_fn r_log_fn in
     if debug then Log.debug "%s" cmd;
-    if Sys.command cmd <> 0 then
-      collect_script_and_log r_script_fn r_log_fn lambdas_fn
+    if Sys.command cmd <> 0 then []
     else
+      let lambdas = Utls.float_list_of_file lambdas_fn in
       Utls.ignore_fst
-        (if not debug then L.iter Sys.remove [r_script_fn; r_log_fn])
-        (Result.Ok lambdas_fn)
+        (if not debug then L.iter Sys.remove [r_script_fn; r_log_fn; lambdas_fn])
+        lambdas
 
 (* use model in 'model_fn' to predict decision values for test data in 'data_fn'
    and return the filename containing values upon success *)
