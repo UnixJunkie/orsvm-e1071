@@ -1,16 +1,18 @@
 (jbuild_version 1)
 
-(library
- ((name        orsvm_e1071)
-  (public_name orsvm_e1071)
-  (preprocessor_deps (utls.ml))
-  (preprocess (per_module ((action (run ${bin:cppo} ${<})) (svm))
-                          ((action (run ${bin:cppo} ${<})) (svmpath))))
-  (modules (result svm svmpath))
-  (libraries (dolog))))
+; (library
+;  ((name        orsvm_e1071)
+;   (public_name orsvm_e1071)
+;   (preprocessor_deps (utls.ml))
+;   (preprocess (per_module ((action (run ${bin:cppo} ${<})) (svm))
+;                           ((action (run ${bin:cppo} ${<})) (svmpath))))
+;   (modules (result svm svmpath))
+;   (libraries (dolog))))
 
 (executables
  ((names     (test))
   (preprocessor_deps (utls.ml))
-  (preprocess (per_module ((action (run ${bin:cppo} ${<})) (test))))
+  (preprocess (per_module ((action (run ${bin:cppo} ${<})) (svm))
+                          ((action (run ${bin:cppo} ${<})) (svmpath))
+                          ((action (run ${bin:cppo} ${<})) (test))))
   (libraries (dolog batteries cpm))))
