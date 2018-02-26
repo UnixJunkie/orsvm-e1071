@@ -15,7 +15,7 @@ install:
 
 test:
 	jbuilder build src/test.exe
-	_build/default/src/test.exe
+	_build/default/src/test.exe -np `getconf _NPROCESSORS_ONLN`
 
 uninstall:
 	jbuilder uninstall
