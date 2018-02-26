@@ -2,10 +2,6 @@ open Printf
 
 module L = List
 
-module Utls = struct
-  #include "utls.ml"
-end
-
 type gamma = float
 type kernel = RBF of gamma
             | Linear
@@ -13,17 +9,8 @@ type kernel = RBF of gamma
 type filename = string
 
 (* capture everything in case of error *)
-let collect_script_and_log
-    (r_script_fn: filename) (r_log_fn: filename) (model_fn: filename)
-  : Result.t =
-  let buff = Buffer.create 4096 in
-  bprintf buff "--- %s ---\n" r_script_fn;
-  Utls.append_file_to_buffer buff r_script_fn;
-  bprintf buff "--- %s ---\n" r_log_fn;
-  Utls.append_file_to_buffer buff r_log_fn;
-  let err_msg = Buffer.contents buff in
-  L.iter Sys.remove [r_script_fn; r_log_fn; model_fn];
-  Error err_msg
+let collect_script_and_log =
+  Utls.collect_script_and_log
 
 (* train model and return the filename it was saved to upon success *)
 let train ?debug:(debug = false)
@@ -92,8 +79,6 @@ let predict
         (if not debug then L.iter Sys.remove [r_script_fn; r_log_fn])
         (Result.Ok predictions_fn)
 
-(* read the predicted decision values *)
-let read_predictions (maybe_predictions_fn: Result.t): float list =
-  match maybe_predictions_fn with
-  | Error err -> failwith err (* should have been handled by user before *)
-  | Ok predictions_fn -> Utls.float_list_of_file predictions_fn
+(* read predicted decision values *)
+let read_predictions =
+  Utls.read_predictions
