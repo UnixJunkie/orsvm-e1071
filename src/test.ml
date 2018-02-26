@@ -17,6 +17,8 @@ end
 let main () =
   Log.set_log_level Log.DEBUG;
   Log.color_on ();
+  let argc, args = CLI.init () in
+  let ncores = CLI.get_int_def ["-np"] args 1 in
   let data_fn = "data/train_data.txt" in
   let labels_fn = "data/train_labels.txt" in
   let cost = 1.0 in
@@ -52,18 +54,20 @@ let main () =
   | Error err -> failwith err
   | Ok lambdas_fn ->
     let lambdas = Utls.float_list_of_file lambdas_fn in
-    let best_auc = ref 0.0 in
-    let best_lambda = ref 0.0 in
-    L.iter (fun lambda ->
-        let svmpath_preds_fn =
-          Svmpath.predict ~debug:false ~lambda:lambda maybe_model data_fn in
-        let svmpath_preds = Svmpath.read_predictions svmpath_preds_fn in
-        let auc = ROC.auc (List.combine labels svmpath_preds) in
-        if auc > !best_auc then
-          (best_auc := auc;
-           best_lambda := lambda);
-      ) lambdas;
+    let lambda_aucs =
+      Parmap.parmap ~ncores ~chunksize:1 (fun lambda ->
+          let svmpath_preds_fn =
+            Svmpath.predict ~debug:false ~lambda:lambda maybe_model data_fn in
+          let svmpath_preds = Svmpath.read_predictions svmpath_preds_fn in
+          let auc = ROC.auc (List.combine labels svmpath_preds) in
+          (lambda, auc)
+        ) (Parmap.L lambdas) in
+    let best_lambda, best_auc =
+      L.fold_left (fun (best_lambda, best_auc) (lambda, auc) ->
+          if auc > best_auc then (lambda, auc)
+          else (best_lambda, best_auc)
+        ) (0.0, 0.0) lambda_aucs in
     printf "svmpath best_lambda: %f best_AUC: %.3f\n"
-      !best_lambda !best_auc
+      best_lambda best_auc
 
 let () = main ()
