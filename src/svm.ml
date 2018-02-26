@@ -66,22 +66,21 @@ let predict
   | Error err -> Error err
   | Ok model_fn ->
     let predictions_fn = Filename.temp_file "orsvm_e1071_predictions_" ".txt" in
-    (* create R script *)
-    let r_script =
-      sprintf
-        "library('e1071')\n\
-         newdata = as.matrix(read.table('%s'))\n\
-         load('%s')\n\
-         values = attributes(predict(model, newdata, decision.values = TRUE)\
-                            )$decision.values\n\
-         stopifnot(nrow(newdata) == length(values))\n\
-         write.table(values, file = '%s', sep = '\\n', \
-         row.names = FALSE, col.names = FALSE)\n\
-         quit()\n"
-        data_fn model_fn predictions_fn in
-    (* dump it to temp file *)
+    (* create R script in temp file *)
     let r_script_fn = Filename.temp_file "orsvm_e1071_predict_" ".r" in
-    Utls.with_out_file r_script_fn (fun out -> fprintf out "%s" r_script);
+    Utls.with_out_file r_script_fn (fun out ->
+        fprintf out
+          "library('e1071')\n\
+           newdata = as.matrix(read.table('%s'))\n\
+           load('%s')\n\
+           values = attributes(predict(model, newdata, decision.values = TRUE)\
+                              )$decision.values\n\
+           stopifnot(nrow(newdata) == length(values))\n\
+           write.table(values, file = '%s', sep = '\\n', \
+           row.names = FALSE, col.names = FALSE)\n\
+           quit()\n"
+          data_fn model_fn predictions_fn
+      );
     (* execute it *)
     let r_log_fn = Filename.temp_file "orsvm_e1071_predict_" ".log" in
     let cmd = sprintf "R --vanilla --slave < %s 2>&1 > %s" r_script_fn r_log_fn in
