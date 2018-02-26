@@ -15,4 +15,4 @@
   (preprocess (per_module ((action (run ${bin:cppo} ${<})) (svm))
                           ((action (run ${bin:cppo} ${<})) (svmpath))
                           ((action (run ${bin:cppo} ${<})) (test))))
-  (libraries (dolog batteries cpm))))
+  (libraries (dolog batteries cpm minicli parmap))))
