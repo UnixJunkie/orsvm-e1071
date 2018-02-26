@@ -12,6 +12,5 @@ build: [
 ]
 depends: [
   "jbuilder" {build}
-  "cppo" {build}
   "conf-r"
 ]
