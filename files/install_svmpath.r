@@ -1,1 +1,5 @@
-install.packages('svmpath', repos='http://cran.r-project.org')
+pkg <- 'svmpath'
+if (!require(pkg, character.only = TRUE)) {
+   install.packages(pkg, dependencies = TRUE,
+                    repos='http://cran.r-project.org')
+}
