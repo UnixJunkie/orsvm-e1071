@@ -16,7 +16,7 @@ let train ?debug:(debug = false)
   let r_script_fn = Filename.temp_file "orsvm_svmpath_" ".r" in
   Utls.with_out_file r_script_fn (fun out ->
       fprintf out
-        "library('svmpath')\n\
+        "library('svmpath', quietly = TRUE)\n\
          x = as.matrix(read.table('%s'))\n\
          y = as.vector(read.table('%s'), mode = 'numeric')\n\
          stopifnot(nrow(x) == length(y))\n\
@@ -46,7 +46,7 @@ let read_lambdas ?debug:(debug = false) (maybe_model_fn: Result.t): float list =
     let r_script_fn = Filename.temp_file "orsvm_lambdas_" ".r" in
     Utls.with_out_file r_script_fn (fun out ->
         fprintf out
-          "library('svmpath')\n\
+          "library('svmpath', quietly = TRUE)\n\
            load('%s')\n\
            lambdas = path$lambda\n\
            write.table(lambdas, file = '%s', sep = '\\n', \
@@ -76,7 +76,7 @@ let predict ?debug:(debug = false) ~lambda:lambda
     let r_script_fn = Filename.temp_file "orsvm_svmpath_predict_" ".r" in
     Utls.with_out_file r_script_fn (fun out ->
       fprintf out
-        "library('svmpath')\n\
+        "library('svmpath', quietly = TRUE)\n\
          newx = as.matrix(read.table('%s'))\n\
          load('%s')\n\
          values = predict(path, newx, lambda=%f)\n\
