@@ -5,8 +5,8 @@ module L = List
 type filename = string
 
 (* capture everything in case of error *)
-let collect_script_and_log =
-  Utls.collect_script_and_log
+let collect_script_and_log debug =
+  Utls.collect_script_and_log debug
 
 (* train a SVM with linear kernel and find all values of lambda *)
 let train ?debug:(debug = false)
@@ -30,7 +30,7 @@ let train ?debug:(debug = false)
   let cmd = sprintf "R --vanilla --slave < %s 2>&1 > %s" r_script_fn r_log_fn in
   if debug then Log.debug "%s" cmd;
   if Sys.command cmd <> 0 then
-    collect_script_and_log r_script_fn r_log_fn model_fn
+    collect_script_and_log debug r_script_fn r_log_fn model_fn
   else
     Utls.ignore_fst
       (if not debug then L.iter Sys.remove [r_script_fn; r_log_fn])
@@ -91,7 +91,7 @@ let predict ?debug:(debug = false) ~lambda:lambda
     let cmd = sprintf "R --vanilla --slave < %s 2>&1 > %s" r_script_fn r_log_fn in
     if debug then Log.debug "%s" cmd;
     if Sys.command cmd <> 0 then
-      collect_script_and_log r_script_fn r_log_fn predictions_fn
+      collect_script_and_log debug r_script_fn r_log_fn predictions_fn
     else
       Utls.ignore_fst
         (if not debug then L.iter Sys.remove [r_script_fn; r_log_fn])

@@ -38,7 +38,7 @@ let train ?debug:(debug = false)
   let cmd = sprintf "R --vanilla --slave < %s 2>&1 > %s" r_script_fn r_log_fn in
   if debug then Log.debug "%s" cmd;
   if Sys.command cmd <> 0 then
-    collect_script_and_log r_script_fn r_log_fn model_fn
+    collect_script_and_log debug r_script_fn r_log_fn model_fn
   else
     Utls.ignore_fst
       (if not debug then L.iter Sys.remove [r_script_fn; r_log_fn])
@@ -73,7 +73,7 @@ let predict
     let cmd = sprintf "R --vanilla --slave < %s 2>&1 > %s" r_script_fn r_log_fn in
     if debug then Log.debug "%s" cmd;
     if Sys.command cmd <> 0 then
-      collect_script_and_log r_script_fn r_log_fn predictions_fn
+      collect_script_and_log debug r_script_fn r_log_fn predictions_fn
     else
       Utls.ignore_fst
         (if not debug then L.iter Sys.remove [r_script_fn; r_log_fn])
