@@ -36,7 +36,7 @@ let train ?debug:(debug = false)
   let r_log_fn = Filename.temp_file "orsvm_e1071_train_" ".log" in
   (* execute it *)
   let cmd = sprintf "R --vanilla --slave < %s 2>&1 > %s" r_script_fn r_log_fn in
-  if debug then Log.debug "%s" cmd;
+  Log.debug "%s" cmd;
   if Sys.command cmd <> 0 then
     collect_script_and_log debug r_script_fn r_log_fn model_fn
   else
@@ -46,9 +46,8 @@ let train ?debug:(debug = false)
 
 (* use model in 'model_fn' to predict decision values for test data in 'data_fn'
    and return the filename containing values upon success *)
-let predict
-    ?debug:(debug = false) (maybe_model_fn: Result.t) (data_fn: filename)
-  : Result.t =
+let predict ?debug:(debug = false)
+    (maybe_model_fn: Result.t) (data_fn: filename): Result.t =
   match maybe_model_fn with
   | Error err -> Error err
   | Ok model_fn ->
@@ -71,7 +70,7 @@ let predict
     (* execute it *)
     let r_log_fn = Filename.temp_file "orsvm_e1071_predict_" ".log" in
     let cmd = sprintf "R --vanilla --slave < %s 2>&1 > %s" r_script_fn r_log_fn in
-    if debug then Log.debug "%s" cmd;
+    Log.debug "%s" cmd;
     if Sys.command cmd <> 0 then
       collect_script_and_log debug r_script_fn r_log_fn predictions_fn
     else
@@ -80,5 +79,5 @@ let predict
         (Result.Ok predictions_fn)
 
 (* read predicted decision values *)
-let read_predictions =
-  Utls.read_predictions
+let read_predictions ?debug:(debug = false) =
+  Utls.read_predictions debug

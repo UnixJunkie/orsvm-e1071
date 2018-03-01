@@ -58,7 +58,10 @@ let collect_script_and_log
   if not debug then L.iter Sys.remove [r_script_fn; r_log_fn; model_fn];
   Error err_msg
 
-let read_predictions (maybe_predictions_fn: Result.t): float list =
+let read_predictions (debug: bool) (maybe_predictions_fn: Result.t): float list =
   match maybe_predictions_fn with
   | Error err -> failwith err (* should have been handled by user before *)
-  | Ok predictions_fn -> float_list_of_file predictions_fn
+  | Ok predictions_fn ->
+    let res = float_list_of_file predictions_fn in
+    if not debug then Sys.remove predictions_fn;
+    res

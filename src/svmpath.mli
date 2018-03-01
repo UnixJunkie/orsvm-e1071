@@ -29,5 +29,7 @@ val predict: ?debug:bool -> lambda:float -> Result.t -> filename -> Result.t
 
 (** [read_predictions result] will decode predicted decision values
     in [result], or crash if the previous call to [predict]
-    was not successful. *)
-val read_predictions: Result.t -> float list
+    was not successful.
+    Upon success and if [not debug], the file containing the
+    predicted decision values is removed. *)
+val read_predictions: ?debug:bool -> Result.t -> float list
