@@ -28,7 +28,7 @@ let train ?debug:(debug = false)
   let r_log_fn = Filename.temp_file "orsvm_svmpath_" ".log" in
   (* execute it *)
   let cmd = sprintf "R --vanilla --slave < %s 2>&1 > %s" r_script_fn r_log_fn in
-  Log.debug "%s" cmd;
+  if debug then Log.debug "%s" cmd;
   if Sys.command cmd <> 0 then
     collect_script_and_log debug r_script_fn r_log_fn model_fn
   else
@@ -57,7 +57,7 @@ let read_lambdas ?debug:(debug = false) (maybe_model_fn: Result.t): float list =
     let r_log_fn = Filename.temp_file "orsvm_lambdas_" ".log" in
     (* execute it *)
     let cmd = sprintf "R --vanilla --slave < %s 2>&1 > %s" r_script_fn r_log_fn in
-    Log.debug "%s" cmd;
+    if debug then Log.debug "%s" cmd;
     if Sys.command cmd <> 0 then []
     else
       let lambdas = Utls.float_list_of_file lambdas_fn in
@@ -89,7 +89,7 @@ let predict ?debug:(debug = false) ~lambda:lambda
     (* execute it *)
     let r_log_fn = Filename.temp_file "orsvm_svmpath_predict_" ".log" in
     let cmd = sprintf "R --vanilla --slave < %s 2>&1 > %s" r_script_fn r_log_fn in
-    Log.debug "%s" cmd;
+    if debug then Log.debug "%s" cmd;
     if Sys.command cmd <> 0 then
       collect_script_and_log debug r_script_fn r_log_fn predictions_fn
     else
