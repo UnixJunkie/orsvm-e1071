@@ -37,7 +37,12 @@ let fold_on_lines_of_file fn f acc =
 let float_list_of_file fn =
   let res =
     fold_on_lines_of_file fn (fun acc line ->
-        let pred = Scanf.sscanf line "%f" (fun x -> x) in
+        let pred =
+          try Scanf.sscanf line "%f" (fun x -> x)
+          with Scanf.Scan_failure msg ->
+            (* percolate a NaN rather than crashing *)
+            (Log.error "%s: %s" msg line;
+             nan) in
         pred :: acc
       ) [] in
   L.rev res
@@ -62,6 +67,7 @@ let read_predictions (debug: bool) (maybe_predictions_fn: Result.t): float list 
   match maybe_predictions_fn with
   | Error err -> failwith err (* should have been handled by user before *)
   | Ok predictions_fn ->
+    if debug then Log.debug "%s" predictions_fn;
     let res = float_list_of_file predictions_fn in
     if not debug then Sys.remove predictions_fn;
     res
