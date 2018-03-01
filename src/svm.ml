@@ -36,7 +36,7 @@ let train ?debug:(debug = false)
   let r_log_fn = Filename.temp_file "orsvm_e1071_train_" ".log" in
   (* execute it *)
   let cmd = sprintf "R --vanilla --slave < %s 2>&1 > %s" r_script_fn r_log_fn in
-  Log.debug "%s" cmd;
+  if debug then Log.debug "%s" cmd;
   if Sys.command cmd <> 0 then
     collect_script_and_log debug r_script_fn r_log_fn model_fn
   else
@@ -70,7 +70,7 @@ let predict ?debug:(debug = false)
     (* execute it *)
     let r_log_fn = Filename.temp_file "orsvm_e1071_predict_" ".log" in
     let cmd = sprintf "R --vanilla --slave < %s 2>&1 > %s" r_script_fn r_log_fn in
-    Log.debug "%s" cmd;
+    if debug then Log.debug "%s" cmd;
     if Sys.command cmd <> 0 then
       collect_script_and_log debug r_script_fn r_log_fn predictions_fn
     else
