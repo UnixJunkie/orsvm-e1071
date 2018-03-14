@@ -6,6 +6,11 @@ type kernel = RBF of gamma
 
 type filename = string
 
+type nb_columns = int
+
+type sparsity = Dense
+              | Sparse of nb_columns
+
 (** [train ~cost kernel data_fn labels_fn] will train a binary
     SVM classifier with the given RBF or Linear kernel
     with parameter [cost] on the data in [data_fn] with labels
@@ -16,7 +21,7 @@ type filename = string
     in a text file, without any format header.
     Column [i] in [labels_fn] is the corresponding label of line [i]
     in [data_fn]. *)
-val train: ?debug:bool -> cost:float -> kernel -> filename -> filename -> Result.t
+val train: ?debug:bool -> sparsity -> cost:float -> kernel -> filename -> filename -> Result.t
 
 (** [predict train_result to_predict_data_fn] will run the previously trained
     SVM model on the new data stored in [to_predict_data_fn].
@@ -24,7 +29,7 @@ val train: ?debug:bool -> cost:float -> kernel -> filename -> filename -> Result
     used while training.
     On success, a filename is returned. This text file contains the predicted
     decision values, one per line of [to_predict_data_fn]. *)
-val predict: ?debug:bool -> Result.t -> filename -> Result.t
+val predict: ?debug:bool -> sparsity -> Result.t -> filename -> Result.t
 
 (** [read_predictions result] will decode predicted decision values
     in [result], or crash if the previous call to [predict]
