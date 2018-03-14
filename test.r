@@ -2,6 +2,7 @@ library('e1071')
 
 # matrix with n rows (observations) and p columns (features)
 x = as.matrix(read.table("data/train_data.txt"))
+#x = read.matrix.csr("data/train_data.csr", fac = FALSE)
 
 # vector of size n and values +1 or -1 only
 y = as.factor(as.vector(read.table("data/train_labels.txt"),
