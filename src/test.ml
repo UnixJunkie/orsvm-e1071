@@ -16,19 +16,24 @@ let main () =
   let argc, args = CLI.init () in
   let ncores = CLI.get_int_def ["-np"] args 1 in
   let data_fn = "data/train_data.txt" in
+  let sparse_data_fn = "data/train_data.csr" in
   let labels_fn = "data/train_labels.txt" in
   let cost = 1.0 in
   let rbf_preds =
     let rbf =
       let gamma = 1.0 /. 1831.0 in
       Svm.RBF gamma in
-    let rbf_model = Svm.train ~debug:true ~cost rbf data_fn labels_fn in
-    let rbf_preds_fn = Svm.predict ~debug:true rbf_model data_fn in
+    let rbf_model = Svm.train ~debug:true Dense ~cost rbf data_fn labels_fn in
+    let rbf_preds_fn = Svm.predict ~debug:true Dense rbf_model data_fn in
     Svm.read_predictions rbf_preds_fn in
   let lin_preds =
-    let lin_model = Svm.train ~debug:true ~cost Svm.Linear data_fn labels_fn in
-    let lin_preds_fn = Svm.predict ~debug:true lin_model data_fn in
+    let lin_model = Svm.train ~debug:true Dense ~cost Svm.Linear data_fn labels_fn in
+    let lin_preds_fn = Svm.predict ~debug:true Dense lin_model data_fn in
     Svm.read_predictions lin_preds_fn in
+  let sparse_lin_preds =
+    let sparse_lin_model = Svm.train ~debug:true (Sparse 1831) ~cost Svm.Linear sparse_data_fn labels_fn in
+    let sparse_lin_preds_fn = Svm.predict ~debug:true (Sparse 1831) sparse_lin_model sparse_data_fn in
+    Svm.read_predictions sparse_lin_preds_fn in
   assert(List.length rbf_preds = 88);
   assert(List.length lin_preds = 88);
   (* List.iter (printf "%f\n") predictions *)
@@ -44,12 +49,10 @@ let main () =
   printf "RBF AUC: %.3f\n" rbf_auc;
   let lin_auc = ROC.auc (List.combine labels lin_preds) in
   printf "Lin AUC: %.3f\n" lin_auc;
+  let sparse_lin_auc = ROC.auc (List.combine labels sparse_lin_preds) in
+  printf "sparse Lin AUC: %.3f\n" sparse_lin_auc;
   let maybe_model = Svmpath.train ~debug:true data_fn labels_fn in
-  let maybe_lambdas_fn = Svmpath.read_lambdas ~debug:true maybe_model in
-  match maybe_lambdas_fn with
-  | Error err -> failwith err
-  | Ok lambdas_fn ->
-    let lambdas = Utls.float_list_of_file lambdas_fn in
+  let lambdas = Svmpath.read_lambdas ~debug:true maybe_model in
     let lambda_aucs =
       Parmap.parmap ~ncores ~chunksize:1 (fun lambda ->
           let svmpath_preds_fn =
