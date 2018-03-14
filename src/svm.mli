@@ -11,7 +11,7 @@ type nb_columns = int
 type sparsity = Dense
               | Sparse of nb_columns
 
-(** [train ~cost kernel data_fn labels_fn] will train a binary
+(** [train ~cost Dense kernel data_fn labels_fn] will train a binary
     SVM classifier with the given RBF or Linear kernel
     with parameter [cost] on the data in [data_fn] with labels
     in [labels_fn].
@@ -23,7 +23,7 @@ type sparsity = Dense
     in [data_fn]. *)
 val train: ?debug:bool -> sparsity -> cost:float -> kernel -> filename -> filename -> Result.t
 
-(** [predict train_result to_predict_data_fn] will run the previously trained
+(** [predict Dense train_result to_predict_data_fn] will run the previously trained
     SVM model on the new data stored in [to_predict_data_fn].
     [to_predict_data_fn] must follow the same format than [data_fn]
     used while training.
