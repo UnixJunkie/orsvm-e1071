@@ -13,4 +13,15 @@ build: [
 depends: [
   "jbuilder" {build}
   "conf-r"
+  "dolog" {test}
+  "batteries" {test}
+  "cpm" {test}
+  "minicli" {test}
+  "parmap" {test}
+]
+post-messages: [
+"Please interact with R to install needed things in user-space:\n
+R\n
+install.packages('e1071', repos='http://cran.r-project.org')\n
+install.packages('svmpath', repos='http://cran.r-project.org')\n" {failure}
 ]
