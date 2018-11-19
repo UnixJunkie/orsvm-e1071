@@ -8,12 +8,15 @@ module Score_label = struct
   let get_score (_, s) = s
 end
 
-module ROC = MakeROC.Make(Score_label)
+module ROC = Cpm.MakeROC.Make(Score_label)
+module Svm = Orsvm_e1071.Svm
+module Svmpath = Orsvm_e1071.Svmpath
+module Utls = Orsvm_e1071.Utls
 
 let main () =
   Log.set_log_level Log.DEBUG;
   Log.color_on ();
-  let argc, args = CLI.init () in
+  let _argc, args = CLI.init () in
   let ncores = CLI.get_int_def ["-np"] args 1 in
   let data_fn = "data/train_data.txt" in
   let sparse_data_fn = "data/train_data.csr" in

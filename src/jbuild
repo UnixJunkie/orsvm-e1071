@@ -9,4 +9,4 @@
 (executables
  ((names     (test))
   (modules   (test))
-  (libraries (dolog batteries cpm minicli parmap))))
+  (libraries (orsvm_e1071 dolog batteries cpm minicli parmap))))
