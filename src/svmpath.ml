@@ -39,7 +39,7 @@ let train ?debug:(debug = false)
 (* read lambda values found during training *)
 let read_lambdas ?debug:(debug = false) (maybe_model_fn: Result.t): float list =
   match maybe_model_fn with
-  | Error err -> []
+  | Error _err -> []
   | Ok model_fn ->
     let lambdas_fn = Filename.temp_file "orsvm_lambdas_" ".txt" in
     (* create R script and store it in a temp file *)
