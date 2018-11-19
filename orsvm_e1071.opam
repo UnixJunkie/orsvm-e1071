@@ -1,6 +1,7 @@
-opam-version: "1.2"
+opam-version: "2.0"
 maintainer: "ligand@free.fr"
 authors: ["Francois BERENGER"]
+synopsis: "OCaml wrapper to SVM R packages e1071 and svmpath"
 homepage: "https://github.com/UnixJunkie/orsvm-e1071"
 bug-reports: "https://github.com/UnixJunkie/orsvm-e1071/issues"
 dev-repo: "git+https://github.com/UnixJunkie/orsvm-e1071.git"
