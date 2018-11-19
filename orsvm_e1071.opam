@@ -11,7 +11,7 @@ build: [
   ["jbuilder" "build" "-p" name "-j" jobs]
 ]
 depends: [
-  "jbuilder" {build}
+  "dune" {build}
   "conf-r"
   "dolog" {test}
   "batteries" {test}
