@@ -9,7 +9,3 @@ offered by the R packages.
 
 This is probably not high performance: data are exchanged between
 R and OCaml via ASCII files.
-
-This project is part of the poor lonesome cowboy's plan to enhance
-the OCaml ecosystem in the Machine Learning field.
-Don't hesitate to contact me if you want to join this effort.
