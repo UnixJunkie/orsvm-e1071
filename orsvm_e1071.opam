@@ -6,13 +6,13 @@ bug-reports: "https://github.com/UnixJunkie/orsvm-e1071/issues"
 dev-repo: "git+https://github.com/UnixJunkie/orsvm-e1071.git"
 license: "LGPL + linking exception"
 build: [
-  ["jbuilder" "build" "-p" name "-j" jobs]
+  ["dune" "build" "-p" name "-j" jobs]
 ]
 depends: [
   "ocaml"
   "conf-r"
   "dolog"
-  "jbuilder" {build}
+  "dune" {build}
   "batteries" {with-test}
   "cpm" {with-test}
   "minicli" {with-test}
@@ -34,7 +34,3 @@ lambda.
 This package really fires up and talks to an R interpreter.
 The Svm module can handle dense or sparse data matrices.
 The Svmpath module only handles dense matrices."""
-# url {
-#   src: "https://github.com/UnixJunkie/orsvm-e1071/archive/v3.0.1.tar.gz"
-#   checksum: "md5=c1a13f0e85a1e35fa56f9a6c80b121ba"
-# }
