@@ -1,4 +1,4 @@
-library('svmpath')
+suppressPackageStartupMessages(library('svmpath'))
 
 # matrix with n rows (observations) and p columns (features)
 x = as.matrix(read.table("data/train_data.txt"))

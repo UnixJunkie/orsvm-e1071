@@ -16,7 +16,7 @@ let train ?debug:(debug = false)
   let r_script_fn = Filename.temp_file "orsvm_svmpath_" ".r" in
   Utls.with_out_file r_script_fn (fun out ->
       fprintf out
-        "library('svmpath', quietly = TRUE)\n\
+        "suppressPackageStartupMessages(library('svmpath'))\n\
          x = as.matrix(read.table('%s'))\n\
          y = as.vector(read.table('%s'), mode = 'numeric')\n\
          stopifnot(nrow(x) == length(y))\n\
@@ -46,7 +46,7 @@ let read_lambdas ?debug:(debug = false) (maybe_model_fn: Result.t): float list =
     let r_script_fn = Filename.temp_file "orsvm_lambdas_" ".r" in
     Utls.with_out_file r_script_fn (fun out ->
         fprintf out
-          "library('svmpath', quietly = TRUE)\n\
+          "suppressPackageStartupMessages(library('svmpath'))\n\
            load('%s')\n\
            lambdas = path$lambda\n\
            write.table(lambdas, file = '%s', sep = '\\n', \
@@ -56,14 +56,16 @@ let read_lambdas ?debug:(debug = false) (maybe_model_fn: Result.t): float list =
       );
     let r_log_fn = Filename.temp_file "orsvm_lambdas_" ".log" in
     (* execute it *)
-    let cmd = sprintf "R --vanilla --slave < %s 2>&1 > %s" r_script_fn r_log_fn in
+    let cmd =
+      sprintf "R --vanilla --slave < %s 2>&1 > %s" r_script_fn r_log_fn in
     if debug then Log.debug "%s" cmd;
     if Sys.command cmd <> 0 then []
     else
       let lambdas = Utls.float_list_of_file lambdas_fn in
       Utls.ignore_fst
-        (if not debug then L.iter Sys.remove [r_script_fn; r_log_fn; lambdas_fn])
-        lambdas
+        (if not debug then
+           L.iter Sys.remove [r_script_fn; r_log_fn; lambdas_fn]
+        ) lambdas
 
 (* use model in 'model_fn' to predict decision values for test data in 'data_fn'
    and return the filename containing values upon success *)
@@ -76,7 +78,7 @@ let predict ?debug:(debug = false) ~lambda:lambda
     let r_script_fn = Filename.temp_file "orsvm_svmpath_predict_" ".r" in
     Utls.with_out_file r_script_fn (fun out ->
       fprintf out
-        "library('svmpath', quietly = TRUE)\n\
+        "suppressPackageStartupMessages(library('svmpath'))\n\
          newx = as.matrix(read.table('%s'))\n\
          load('%s')\n\
          values = predict(path, newx, lambda=%f)\n\
